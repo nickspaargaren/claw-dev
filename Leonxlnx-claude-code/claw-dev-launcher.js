@@ -6,6 +6,9 @@ const readline = require("node:readline/promises");
 
 const repoRoot = __dirname;
 const workspaceRoot = path.dirname(repoRoot);
+
+// Load .env from the workspace root so all env vars are available to the launcher
+require("dotenv").config({ path: path.join(workspaceRoot, ".env") });
 const cliPath = path.join(repoRoot, "package", "cli.js");
 const brandingPatchPath = path.join(repoRoot, "patch-branding.js");
 const defaultPorts = {
