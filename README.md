@@ -33,6 +33,8 @@ Claw Dev is designed to feel like one tool rather than a provider-specific wrapp
   - optional environment template for local setup
 - `package.json`
   - root scripts for launching, building, and validating the workspace
+- `CONTRIBUTORS.md`
+  - manual contributor credits for community PRs and superseded implementations
 
 ## Supported Providers
 
