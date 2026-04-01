@@ -11,6 +11,7 @@
     "dev": "tsx src/index.ts",
     "claw-dev": "node Leonxlnx-claude-code/claw-dev-launcher.js",
     "proxy:compat": "tsx src/anthropicCompatProxy.ts",
+    "proxy:ollama": "tsx src/ollamaCompatProxy.ts",
     "proxy:gemini": "tsx src/anthropicCompatProxy.ts",
     "start": "node Leonxlnx-claude-code/claw-dev-launcher.js",
     "legacy-start": "node dist/index.js",

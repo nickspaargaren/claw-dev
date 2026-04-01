@@ -25,6 +25,8 @@ const defaultPorts = {
   ollama: "8792",
 };
 
+const DEFAULT_BEDROCK_MODEL = process.env.CLAUDE_DEFAULT_BEDROCK_MODEL?.trim() || "";
+
 const providerMenuOptions = [
   ["1", "anthropic", "Anthropic", "Best overall Claude-style compatibility", "ANTHROPIC_API_KEY"],
   ["2", "openai", "OpenAI", "Strong general cloud option with custom model ids", "OPENAI_API_KEY or reusable Codex login"],
@@ -34,6 +36,7 @@ const providerMenuOptions = [
   ["6", "copilot", "Copilot", "GitHub Models path with a smaller request budget", "COPILOT_TOKEN or GitHub Models token"],
   ["7", "zai", "z.ai", "GLM family models through an OpenAI-style API", "ZAI_API_KEY"],
   ["8", "ollama", "Ollama", "Local models with zero cloud dependency", "Running Ollama server"],
+  ["9", "bedrock", "Amazon Bedrock", "Native AWS-hosted Claude integration through the bundled client", "AWS credentials"],
 ];
 
 let exiting = false;
@@ -70,6 +73,11 @@ async function main() {
       if (!infoOnly) {
         await configureAnthropic(env, rl);
       }
+      return launchBundledClient(env, forwardArgs);
+    }
+
+    if (provider === "bedrock") {
+      await configureNativeBedrock(env, rl, modelArg);
       return launchBundledClient(env, forwardArgs);
     }
 
@@ -119,7 +127,7 @@ function applyBrandingPatch() {
 
 async function resolveProvider(rl, providerArg, forwardArgs) {
   const preset = normalizeProviderName((providerArg ?? process.env.CLAW_PROVIDER ?? "").trim().toLowerCase());
-  if (["anthropic", "openai", "gemini", "groq", "openrouter", "copilot", "zai", "ollama"].includes(preset)) {
+  if (["anthropic", "openai", "gemini", "groq", "openrouter", "copilot", "zai", "ollama", "bedrock"].includes(preset)) {
     return preset;
   }
 
@@ -162,6 +170,9 @@ function normalizeProviderName(raw) {
   }
   if (raw === "chatgpt") {
     return "openai";
+  }
+  if (raw === "aws" || raw === "amazon") {
+    return "bedrock";
   }
   return raw;
 }
@@ -500,6 +511,49 @@ async function configureCompatProvider(provider, env, rl, modelArg) {
   }
 }
 
+async function configureNativeBedrock(env, rl, modelArg) {
+  printProviderStartSummary("bedrock", [
+    "Launching native Amazon Bedrock mode through the bundled client.",
+    "This path uses AWS credentials directly instead of the local compatibility proxy.",
+  ]);
+
+  env.CLAUDE_CODE_USE_BEDROCK = "1";
+  delete env.ANTHROPIC_BASE_URL;
+  delete env.ANTHROPIC_AUTH_TOKEN;
+  delete env.ANTHROPIC_API_KEY;
+
+  const selectedModel = await resolveModelSelection({
+    rl,
+    env,
+    provider: "bedrock",
+    modelArg,
+    envKey: "BEDROCK_MODEL",
+    defaultModel: env.BEDROCK_MODEL?.trim() || DEFAULT_BEDROCK_MODEL || "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    suggestions: [
+      "us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+      "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+      "anthropic.claude-3-5-haiku-20241022-v1:0",
+    ],
+  });
+
+  env.BEDROCK_MODEL = selectedModel;
+  env.ANTHROPIC_MODEL = selectedModel;
+
+  const configuredRegion = env.AWS_REGION?.trim() || env.AWS_DEFAULT_REGION?.trim() || env.BEDROCK_REGION?.trim();
+  if (configuredRegion) {
+    env.AWS_REGION = configuredRegion;
+    env.AWS_DEFAULT_REGION = configuredRegion;
+  } else {
+    env.AWS_REGION = "us-east-1";
+    env.AWS_DEFAULT_REGION = "us-east-1";
+  }
+
+  process.stdout.write(`\nUsing native Bedrock mode with region ${env.AWS_REGION}.\n`);
+  process.stdout.write(`Launching Bedrock mode with model ${env.BEDROCK_MODEL}.\n`);
+  process.stdout.write("Make sure your AWS credentials and model access are configured before starting the session.\n");
+}
+
 async function resolveOpenAIAuthForLauncher(env) {
   const helperUrl = pathToFileURL(path.join(workspaceRoot, "shared", "openaiAuth.js")).href;
   const { formatOpenAIAuthHint, resolveOpenAIAuth } = await import(helperUrl);
@@ -537,12 +591,13 @@ async function resolveModelSelection({ rl, env, provider, modelArg, envKey, defa
   // Only applies to single/double digit numbers — real model IDs like
   // "qwen2.5-coder:7b" contain non-digit characters and won't match.
   if (answer && /^\d{1,2}$/.test(answer) && suggestedModels.length > 0) {
+    const fallbackModel = /^\d{1,2}$/.test(existing) ? defaultModel : existing;
     process.stdout.write(
       `\n⚠  "${answer}" looks like a menu number, not a model name.\n` +
       `   Did you mean one of: ${suggestedModels.join(", ")}?\n` +
-      `   Using default model: ${existing}\n\n`
+      `   Using default model: ${fallbackModel}\n\n`
     );
-    env[envKey] = existing;
+    env[envKey] = fallbackModel;
     return env[envKey];
   }
 
@@ -641,8 +696,14 @@ async function primeAvailableModels(provider, env) {
     modelOverrides: nextModelOverrides,
   };
 
-  fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
-  fs.writeFileSync(settingsPath, `${JSON.stringify(nextSettings, null, 2)}\n`, "utf8");
+  try {
+    fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+    fs.writeFileSync(settingsPath, `${JSON.stringify(nextSettings, null, 2)}\n`, "utf8");
+  } catch (error) {
+    console.warn(`Could not write availableModels in ${settingsPath}; skipping priming.`);
+    restoreAvailableModels = null;
+    return;
+  }
 
   restoreAvailableModels = () => {
     try {
@@ -694,15 +755,17 @@ async function ensureCompatProxy(provider, env) {
     return;
   }
 
+  const proxyScript = provider === "ollama" ? "proxy:ollama" : "proxy:compat";
+
   proxyProcess =
     process.platform === "win32"
-      ? spawn("cmd.exe", ["/d", "/s", "/c", "npm run proxy:compat"], {
+      ? spawn("cmd.exe", ["/d", "/s", "/c", `npm run ${proxyScript}`], {
           cwd: workspaceRoot,
           stdio: "ignore",
           windowsHide: true,
           env,
         })
-      : spawn("npm", ["run", "proxy:compat"], {
+      : spawn("npm", ["run", proxyScript], {
           cwd: workspaceRoot,
           stdio: "ignore",
           env,
@@ -750,6 +813,8 @@ function modelForProvider(provider, env) {
       return env.COPILOT_MODEL;
     case "zai":
       return env.ZAI_MODEL;
+    case "bedrock":
+      return env.BEDROCK_MODEL;
     default:
       return "";
   }

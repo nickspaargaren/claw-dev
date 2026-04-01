@@ -1,4 +1,5 @@
 const MODEL_ENV_KEY_BY_PROVIDER = {
+  bedrock: "BEDROCK_MODEL",
   openai: "OPENAI_MODEL",
   gemini: "GEMINI_MODEL",
   groq: "GROQ_MODEL",
@@ -9,6 +10,7 @@ const MODEL_ENV_KEY_BY_PROVIDER = {
 };
 
 const PROVIDER_LABELS = {
+  bedrock: "Amazon Bedrock",
   openai: "OpenAI",
   gemini: "Google Gemini",
   groq: "Groq",
@@ -19,6 +21,12 @@ const PROVIDER_LABELS = {
 };
 
 const DEFAULT_MODEL_CATALOG = {
+  bedrock: [
+    "us.anthropic.claude-sonnet-4-20250514-v1:0",
+    "us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+    "us.anthropic.claude-3-5-sonnet-20241022-v2:0",
+    "anthropic.claude-3-5-haiku-20241022-v1:0",
+  ],
   openai: ["gpt-5-mini", "gpt-5.2", "gpt-5-nano", "gpt-5.2-codex", "gpt-4.1", "o3-mini", "o4-mini"],
   gemini: ["gemini-2.5-flash", "gemini-2.5-pro", "gemma-3-27b-it"],
   groq: ["openai/gpt-oss-20b", "openai/gpt-oss-120b", "qwen/qwen3-32b", "llama-3.3-70b-versatile"],

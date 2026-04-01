@@ -16,7 +16,8 @@ Claw Dev is a local multi-provider coding assistant launcher for the bundled ter
 - OpenRouter through a local Anthropic-compatible proxy
 - Copilot through the GitHub Models API
 - z.ai through a local Anthropic-compatible proxy
-- Ollama through a local Anthropic-compatible proxy
+- Ollama through a dedicated local-light proxy
+- Amazon Bedrock through the bundled client's native Bedrock mode
 
 Claw Dev is designed to feel like one tool rather than a provider-specific wrapper. The launcher, provider prompts, environment variables, and documentation are all centered around the `Claw Dev` name.
 
@@ -25,7 +26,9 @@ Claw Dev is designed to feel like one tool rather than a provider-specific wrapp
 - `Leonxlnx-claude-code/`
   - bundled terminal client and platform launchers
 - `src/anthropicCompatProxy.ts`
-  - local Anthropic-compatible proxy used for OpenAI, Gemini, Groq, OpenRouter, Ollama, Copilot, and z.ai
+  - local Anthropic-compatible proxy used for OpenAI, Gemini, Groq, OpenRouter, Copilot, and z.ai
+- `src/ollamaCompatProxy.ts`
+  - local Ollama-specialized proxy with lighter prompt compaction for local models
 - `.env.example`
   - optional environment template for local setup
 - `package.json`
@@ -65,6 +68,12 @@ Use a local or remote Ollama server and route requests through the local compati
 
 This is the best option if you want local inference and do not want to depend on a cloud API provider.
 
+### Amazon Bedrock
+
+Use native Bedrock mode through the bundled client with AWS credentials and Bedrock model access.
+
+This is the best option if you want AWS-hosted Claude models without going through the local compatibility proxy.
+
 ### Copilot
 
 Use a GitHub Models-compatible bearer token and route requests through the local compatibility proxy.
@@ -101,6 +110,10 @@ Provider-specific requirements:
   - `COPILOT_TOKEN` or another GitHub Models-compatible bearer token
 - z.ai
   - `ZAI_API_KEY`
+- Amazon Bedrock
+  - AWS credentials with Bedrock model access
+  - `AWS_REGION`
+  - optional `BEDROCK_MODEL`
 
 ## System Requirements
 
@@ -203,6 +216,7 @@ When Claw Dev starts, it shows a provider selector:
 6. Copilot
 7. z.ai
 8. Ollama
+9. Amazon Bedrock
 
 If a required API key is missing, Claw Dev prompts for it.
 
@@ -262,6 +276,18 @@ Recommended `.env` values:
 ZAI_API_KEY=your_zai_api_key_here
 ZAI_MODEL=glm-5
 ```
+
+### Amazon Bedrock
+
+Recommended `.env` values:
+
+```env
+CLAUDE_CODE_USE_BEDROCK=
+BEDROCK_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0
+AWS_REGION=us-east-1
+```
+
+Claw Dev copies `BEDROCK_MODEL` into the bundled client's active Anthropic model slot only for Bedrock sessions, because that is how the bundled Bedrock path currently expects model selection to be passed through.
 
 ### OpenAI
 
@@ -407,6 +433,9 @@ Practical guidance:
 - Anthropic
   - best overall compatibility with the bundled client
   - best choice if you want the closest thing to the default slash-command and tool flow
+- Amazon Bedrock
+  - best if you want AWS-hosted Claude access while keeping the bundled native integration path
+  - avoids the local proxy translation layer entirely
 - Gemini
   - usually the strongest non-Anthropic option for agent-style sessions
   - a good default when you want better long-context behavior than GitHub Models
@@ -437,6 +466,8 @@ If you want the least friction:
 
 - Best overall
   - Anthropic with a current Claude model
+- Best AWS-hosted Claude flow
+  - Amazon Bedrock with a current Bedrock Claude model id
 - Best non-Anthropic cloud flow
   - Gemini with `gemini-2.5-flash` or `gemini-2.5-pro`
 - Best OpenAI-first flow
@@ -516,6 +547,13 @@ These are not broken, but they are usually the first place users hit frustration
 ```env
 ANTHROPIC_API_KEY=your_anthropic_api_key_here
 ANTHROPIC_MODEL=claude-sonnet-4-20250514
+```
+
+### Amazon Bedrock
+
+```env
+BEDROCK_MODEL=us.anthropic.claude-sonnet-4-20250514-v1:0
+AWS_REGION=us-east-1
 ```
 
 ### OpenAI
@@ -618,6 +656,7 @@ Skip the provider menu and force a specific provider:
 .\claw-dev.cmd --provider copilot
 .\claw-dev.cmd --provider zai
 .\claw-dev.cmd --provider ollama
+.\claw-dev.cmd --provider bedrock
 ```
 
 You can also skip the default model prompt and force any model id directly:
@@ -630,6 +669,7 @@ You can also skip the default model prompt and force any model id directly:
 .\claw-dev.cmd --provider copilot --model openai/o4-mini
 .\claw-dev.cmd --provider zai --model glm-4.5
 .\claw-dev.cmd --provider ollama --model qwen2.5-coder:14b
+.\claw-dev.cmd --provider bedrock --model us.anthropic.claude-sonnet-4-20250514-v1:0
 ```
 
 Equivalent macOS or Linux examples:
@@ -649,6 +689,7 @@ OPENROUTER_MODELS=openrouter/free,openai/gpt-oss-20b:free,meta-llama/llama-3.3-7
 COPILOT_MODELS=openai/gpt-4.1-mini,openai/gpt-4.1,openai/gpt-4o,openai/o4-mini
 ZAI_MODELS=glm-5,glm-4.5,glm-4.5-air
 OLLAMA_MODELS=qwen3,qwen2.5-coder:7b,qwen2.5-coder:14b,deepseek-r1:8b
+BEDROCK_MODELS=us.anthropic.claude-sonnet-4-20250514-v1:0,us.anthropic.claude-3-7-sonnet-20250219-v1:0,us.anthropic.claude-3-5-sonnet-20241022-v2:0,anthropic.claude-3-5-haiku-20241022-v1:0
 ```
 
 Important note:
@@ -711,9 +752,12 @@ Claw Dev works in two modes:
 
 - Anthropic mode
   - the bundled client talks to Anthropic directly
+- Bedrock mode
+  - the bundled client talks to AWS Bedrock directly
 - Compatibility mode
   - the bundled client talks to the local proxy
-  - the local proxy translates Anthropic-style `/v1/messages` requests into OpenAI, Gemini, Groq, OpenRouter, Ollama, Copilot, or z.ai API calls
+  - the local proxy translates Anthropic-style `/v1/messages` requests into OpenAI, Gemini, Groq, OpenRouter, Copilot, or z.ai API calls
+  - Ollama uses a dedicated lighter proxy because local models benefit from more aggressive prompt compaction than hosted providers
 
 This keeps the terminal experience consistent while allowing different model backends.
 

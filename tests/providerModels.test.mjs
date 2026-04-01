@@ -9,6 +9,7 @@ import {
 } from "../shared/providerModels.js";
 
 test("providerLabel returns human readable provider names", () => {
+  assert.equal(providerLabel("bedrock"), "Amazon Bedrock");
   assert.equal(providerLabel("openai"), "OpenAI");
   assert.equal(providerLabel("gemini"), "Google Gemini");
   assert.equal(providerLabel("openrouter"), "OpenRouter");
@@ -45,4 +46,12 @@ test("openrouter catalog includes provider-qualified model ids", () => {
   assert.equal(catalog[0], "anthropic/claude-sonnet-4");
   assert.ok(catalog.includes("google/gemini-2.5-flash"));
   assert.ok(catalog.includes("openai/gpt-oss-120b"));
+});
+
+test("bedrock catalog includes current Anthropic Bedrock ids", () => {
+  const catalog = providerModelCatalog("bedrock", {
+    BEDROCK_MODEL: "us.anthropic.claude-sonnet-4-20250514-v1:0",
+  });
+  assert.equal(catalog[0], "us.anthropic.claude-sonnet-4-20250514-v1:0");
+  assert.ok(catalog.includes("us.anthropic.claude-3-7-sonnet-20250219-v1:0"));
 });
