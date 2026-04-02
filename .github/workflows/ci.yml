@@ -30,6 +30,9 @@ jobs:
       - name: Run type check
         run: pnpm run check
 
+      - name: Run knip
+        run: pnpm run knip
+
       - name: Run tests
         run: pnpm run test
 
