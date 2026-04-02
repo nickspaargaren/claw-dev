@@ -1,0 +1,7 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["src/**/*.ts", "tests/**/*.mjs", "shared/**/*.js"],
+  "project": ["src/**/*.ts", "shared/**/*.{js,ts}", "tests/**/*.mjs"],
+  "ignore": ["Leonxlnx-claude-code/**", "shared/**/*.d.ts"],
+  "ignoreDependencies": ["ink", "ink-text-input", "react", "@types/react"]
+}
