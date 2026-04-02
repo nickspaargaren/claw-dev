@@ -302,10 +302,16 @@ async function configureAnthropic(env, rl) {
   // Check if OAuth credentials exist (from `claude login` or Claude Max subscription)
   const oauthCreds = readOAuthCredentials(env);
   if (oauthCreds) {
-    process.stdout.write("\nAnthropic auth method\n");
-    process.stdout.write("1. OAuth login (Claude Pro/Max — uses existing claude.ai login)\n");
-    process.stdout.write("2. API key (ANTHROPIC_API_KEY)\n");
-    const choice = (await rl.question("Choose auth method [1]: ")).trim() || "1";
+    // Auto-select OAuth in non-interactive mode (--print, piped stdin)
+    const isInteractive = process.stdin.isTTY && !process.argv.includes("--print");
+    let choice = "1";
+
+    if (isInteractive) {
+      process.stdout.write("\nAnthropic auth method\n");
+      process.stdout.write("1. OAuth login (Claude Pro/Max — uses existing claude.ai login)\n");
+      process.stdout.write("2. API key (ANTHROPIC_API_KEY)\n");
+      choice = (await rl.question("Choose auth method [1]: ")).trim() || "1";
+    }
 
     if (choice === "1") {
       // OAuth mode: don't set ANTHROPIC_API_KEY, let the bundled client use its own OAuth flow
