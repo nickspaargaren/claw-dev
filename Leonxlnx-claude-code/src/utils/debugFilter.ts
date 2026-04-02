@@ -62,7 +62,7 @@ export const parseDebugFilter = memoize(
  *
  * Returns lowercase categories for case-insensitive matching
  */
-export function extractDebugCategories(message: string): string[] {
+function extractDebugCategories(message: string): string[] {
   const categories: string[] = []
 
   // Pattern 3: MCP server "servername" - Check this first to avoid false positives
@@ -113,7 +113,7 @@ export function extractDebugCategories(message: string): string[] {
  * @param filter - Parsed filter configuration
  * @returns true if message should be shown
  */
-export function shouldShowDebugCategories(
+function shouldShowDebugCategories(
   categories: string[],
   filter: DebugFilter | null,
 ): boolean {

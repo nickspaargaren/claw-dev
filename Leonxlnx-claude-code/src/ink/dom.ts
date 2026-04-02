@@ -25,7 +25,7 @@ export type ElementNames =
   | 'ink-progress'
   | 'ink-raw-ansi'
 
-export type NodeNames = ElementNames | TextName
+type NodeNames = ElementNames | TextName
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type DOMElement = {
@@ -107,7 +107,7 @@ export type DOMNode<T = { nodeName: NodeNames }> = T extends {
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export type DOMNodeAttribute = boolean | string | number
 
-export const createNode = (nodeName: ElementNames): DOMElement => {
+const createNode = (nodeName: ElementNames): DOMElement => {
   const needsYogaNode =
     nodeName !== 'ink-virtual-text' &&
     nodeName !== 'ink-link' &&
@@ -131,7 +131,7 @@ export const createNode = (nodeName: ElementNames): DOMElement => {
   return node
 }
 
-export const appendChildNode = (
+const appendChildNode = (
   node: DOMElement,
   childNode: DOMElement,
 ): void => {
@@ -152,7 +152,7 @@ export const appendChildNode = (
   markDirty(node)
 }
 
-export const insertBeforeNode = (
+const insertBeforeNode = (
   node: DOMElement,
   newChildNode: DOMNode,
   beforeChildNode: DOMNode,
@@ -201,7 +201,7 @@ export const insertBeforeNode = (
   markDirty(node)
 }
 
-export const removeChildNode = (
+const removeChildNode = (
   node: DOMElement,
   removeNode: DOMNode,
 ): void => {
@@ -244,7 +244,7 @@ function collectRemovedRects(
   }
 }
 
-export const setAttribute = (
+const setAttribute = (
   node: DOMElement,
   key: string,
   value: DOMNodeAttribute,
@@ -263,7 +263,7 @@ export const setAttribute = (
   markDirty(node)
 }
 
-export const setStyle = (node: DOMNode, style: Styles): void => {
+const setStyle = (node: DOMNode, style: Styles): void => {
   // Compare style properties to avoid marking dirty unnecessarily.
   // React creates new style objects on every render even when unchanged.
   if (stylesEqual(node.style, style)) {
@@ -273,7 +273,7 @@ export const setStyle = (node: DOMNode, style: Styles): void => {
   markDirty(node)
 }
 
-export const setTextStyles = (
+const setTextStyles = (
   node: DOMElement,
   textStyles: TextStyles,
 ): void => {
@@ -315,7 +315,7 @@ function shallowEqual<T extends object>(
   return true
 }
 
-export const createTextNode = (text: string): TextNode => {
+const createTextNode = (text: string): TextNode => {
   const node: TextNode = {
     nodeName: '#text',
     nodeValue: text,
@@ -390,7 +390,7 @@ const measureRawAnsiNode = function (node: DOMElement): {
  * Mark a node and all its ancestors as dirty for re-rendering.
  * Also marks yoga dirty for text remeasurement if this is a text node.
  */
-export const markDirty = (node?: DOMNode): void => {
+const markDirty = (node?: DOMNode): void => {
   let current: DOMNode | undefined = node
   let markedYoga = false
 
@@ -416,13 +416,13 @@ export const markDirty = (node?: DOMNode): void => {
 // DOM-level mutations (scrollTop changes) that should trigger an Ink frame
 // without going through React's reconciler. Pair with markDirty() so the
 // renderer knows which subtree to re-evaluate.
-export const scheduleRenderFrom = (node?: DOMNode): void => {
+const scheduleRenderFrom = (node?: DOMNode): void => {
   let cur: DOMNode | undefined = node
   while (cur?.parentNode) cur = cur.parentNode
   if (cur && cur.nodeName !== '#text') (cur as DOMElement).onRender?.()
 }
 
-export const setTextNodeValue = (node: TextNode, text: string): void => {
+const setTextNodeValue = (node: TextNode, text: string): void => {
   if (typeof text !== 'string') {
     text = String(text)
   }
@@ -443,7 +443,7 @@ function isDOMElement(node: DOMElement | TextNode): node is DOMElement {
 // Clear yogaNode references recursively before freeing.
 // freeRecursive() frees the node and ALL its children, so we must clear
 // all yogaNode references to prevent dangling pointers.
-export const clearYogaNodeReferences = (node: DOMElement | TextNode): void => {
+const clearYogaNodeReferences = (node: DOMElement | TextNode): void => {
   if ('childNodes' in node) {
     for (const child of node.childNodes) {
       clearYogaNodeReferences(child)
@@ -462,7 +462,7 @@ export const clearYogaNodeReferences = (node: DOMElement | TextNode): void => {
  * Only useful when CLAUDE_CODE_DEBUG_REPAINTS is set (otherwise chains are
  * undefined and this returns []).
  */
-export function findOwnerChainAtRow(root: DOMElement, y: number): string[] {
+function findOwnerChainAtRow(root: DOMElement, y: number): string[] {
   let best: string[] = []
   walk(root, 0)
   return best

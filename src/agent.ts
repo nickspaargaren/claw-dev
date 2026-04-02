@@ -1,6 +1,6 @@
 import { AnthropicProvider, GeminiProvider, type LlmProvider, type ProviderName } from "./providers.js";
 
-export type AgentTurnResult = {
+type AgentTurnResult = {
   text: string;
 };
 

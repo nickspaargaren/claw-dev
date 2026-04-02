@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
-export function defaultCodexAuthPath() {
+function defaultCodexAuthPath() {
   return join(homedir(), ".codex", "auth.json");
 }
 

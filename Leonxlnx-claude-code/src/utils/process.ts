@@ -9,7 +9,7 @@ function handleEPIPE(
 }
 
 // Prevents memory leak when pipe is broken (e.g., `claude -p | head -1`)
-export function registerProcessOutputErrorHandlers(): void {
+function registerProcessOutputErrorHandlers(): void {
   process.stdout.on('error', handleEPIPE(process.stdout))
   process.stderr.on('error', handleEPIPE(process.stderr))
 }
@@ -25,7 +25,7 @@ function writeOut(stream: NodeJS.WriteStream, data: string): void {
   stream.write(data /* callback to handle here */)
 }
 
-export function writeToStdout(data: string): void {
+function writeToStdout(data: string): void {
   writeOut(process.stdout, data)
 }
 
@@ -35,7 +35,7 @@ export function writeToStderr(data: string): void {
 
 // Write error to stderr and exit with code 1. Consolidates the
 // console.error + process.exit(1) pattern used in entrypoint fast-paths.
-export function exitWithError(message: string): never {
+function exitWithError(message: string): never {
   // biome-ignore lint/suspicious/noConsole:: intentional console output
   console.error(message)
   // eslint-disable-next-line custom-rules/no-process-exit
@@ -47,7 +47,7 @@ export function exitWithError(message: string): never {
 // unconditionally (caller's accumulator needs all chunks, not just the first).
 // Returns true on timeout, false on end. Used by -p mode to distinguish a
 // real pipe producer from an inherited-but-idle parent stdin.
-export function peekForStdinData(
+function peekForStdinData(
   stream: NodeJS.EventEmitter,
   ms: number,
 ): Promise<boolean> {

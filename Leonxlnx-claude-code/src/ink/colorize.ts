@@ -58,15 +58,15 @@ function clampChalkLevelForTmux(): boolean {
 // Computed once at module load — terminal/tmux environment doesn't change mid-session.
 // Order matters: boost first so the tmux clamp can re-clamp if tmux is running
 // inside a VS Code terminal. Exported for debugging — tree-shaken if unused.
-export const CHALK_BOOSTED_FOR_XTERMJS = boostChalkLevelForXtermJs()
-export const CHALK_CLAMPED_FOR_TMUX = clampChalkLevelForTmux()
+const CHALK_BOOSTED_FOR_XTERMJS = boostChalkLevelForXtermJs()
+const CHALK_CLAMPED_FOR_TMUX = clampChalkLevelForTmux()
 
-export type ColorType = 'foreground' | 'background'
+type ColorType = 'foreground' | 'background'
 
 const RGB_REGEX = /^rgb\(\s?(\d+),\s?(\d+),\s?(\d+)\s?\)$/
 const ANSI_REGEX = /^ansi256\(\s?(\d+)\s?\)$/
 
-export const colorize = (
+const colorize = (
   str: string,
   color: string | undefined,
   type: ColorType,
@@ -173,7 +173,7 @@ export const colorize = (
  * This is the inverse of parsing ANSI codes - we generate them from structured styles.
  * Theme resolution happens at component layer, not here.
  */
-export function applyTextStyles(text: string, styles: TextStyles): string {
+function applyTextStyles(text: string, styles: TextStyles): string {
   let result = text
 
   // Apply styles in reverse order of desired nesting.

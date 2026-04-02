@@ -59,7 +59,7 @@ type Options = {
   screen: Screen
 }
 
-export type Operation =
+type Operation =
   | WriteOperation
   | ClipOperation
   | UnclipOperation
@@ -88,7 +88,7 @@ type ClipOperation = {
   clip: Clip
 }
 
-export type Clip = {
+type Clip = {
   x1: number | undefined
   x2: number | undefined
   y1: number | undefined

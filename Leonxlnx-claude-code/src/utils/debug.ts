@@ -15,7 +15,7 @@ import { getFsImplementation } from './fsOperations.js'
 import { writeToStderr } from './process.js'
 import { jsonStringify } from './slowOperations.js'
 
-export type DebugLogLevel = 'verbose' | 'debug' | 'info' | 'warn' | 'error'
+type DebugLogLevel = 'verbose' | 'debug' | 'info' | 'warn' | 'error'
 
 const LEVEL_ORDER: Record<DebugLogLevel, number> = {
   verbose: 0,
@@ -31,7 +31,7 @@ const LEVEL_ORDER: Record<DebugLogLevel, number> = {
  * include high-volume diagnostics (e.g. full statusLine command, shell, cwd,
  * stdout/stderr) that would otherwise drown out useful debug output.
  */
-export const getMinDebugLogLevel = memoize((): DebugLogLevel => {
+const getMinDebugLogLevel = memoize((): DebugLogLevel => {
   const raw = process.env.CLAUDE_CODE_DEBUG_LOG_LEVEL?.toLowerCase().trim()
   if (raw && Object.hasOwn(LEVEL_ORDER, raw)) {
     return raw as DebugLogLevel
@@ -41,7 +41,7 @@ export const getMinDebugLogLevel = memoize((): DebugLogLevel => {
 
 let runtimeDebugEnabled = false
 
-export const isDebugMode = memoize((): boolean => {
+const isDebugMode = memoize((): boolean => {
   return (
     runtimeDebugEnabled ||
     isEnvTruthy(process.env.DEBUG) ||
@@ -61,7 +61,7 @@ export const isDebugMode = memoize((): boolean => {
  * debug logs by default, so this lets them start capturing without restarting
  * with --debug. Returns true if logging was already active.
  */
-export function enableDebugLogging(): boolean {
+function enableDebugLogging(): boolean {
   const wasActive = isDebugMode() || process.env.USER_TYPE === 'ant'
   runtimeDebugEnabled = true
   isDebugMode.cache.clear?.()
@@ -70,7 +70,7 @@ export function enableDebugLogging(): boolean {
 
 // Extract and parse debug filter from command line arguments
 // Exported for testing purposes
-export const getDebugFilter = memoize((): DebugFilter | null => {
+const getDebugFilter = memoize((): DebugFilter | null => {
   // Look for --debug=pattern in argv
   const debugArg = process.argv.find(arg => arg.startsWith('--debug='))
   if (!debugArg) {
@@ -82,13 +82,13 @@ export const getDebugFilter = memoize((): DebugFilter | null => {
   return parseDebugFilter(filterPattern)
 })
 
-export const isDebugToStdErr = memoize((): boolean => {
+const isDebugToStdErr = memoize((): boolean => {
   return (
     process.argv.includes('--debug-to-stderr') || process.argv.includes('-d2e')
   )
 })
 
-export const getDebugFilePath = memoize((): string | null => {
+const getDebugFilePath = memoize((): string | null => {
   for (let i = 0; i < process.argv.length; i++) {
     const arg = process.argv[i]!
     if (arg.startsWith('--debug-file=')) {
@@ -125,10 +125,10 @@ function shouldLogDebugMessage(message: string): boolean {
 }
 
 let hasFormattedOutput = false
-export function setHasFormattedOutput(value: boolean): void {
+function setHasFormattedOutput(value: boolean): void {
   hasFormattedOutput = value
 }
-export function getHasFormattedOutput(): boolean {
+function getHasFormattedOutput(): boolean {
   return hasFormattedOutput
 }
 
@@ -195,7 +195,7 @@ function getDebugWriter(): BufferedWriter {
   return debugWriter
 }
 
-export async function flushDebugLogs(): Promise<void> {
+async function flushDebugLogs(): Promise<void> {
   debugWriter?.flush()
   await pendingWrite
 }
@@ -227,7 +227,7 @@ export function logForDebugging(
   getDebugWriter().write(output)
 }
 
-export function getDebugLogPath(): string {
+function getDebugLogPath(): string {
   return (
     getDebugFilePath() ??
     process.env.CLAUDE_CODE_DEBUG_LOGS_DIR ??
@@ -255,7 +255,7 @@ const updateLatestDebugLogSymlink = memoize(async (): Promise<void> => {
 /**
  * Logs errors for Ants only, always visible in production.
  */
-export function logAntError(context: string, error: unknown): void {
+function logAntError(context: string, error: unknown): void {
   if (process.env.USER_TYPE !== 'ant') {
     return
   }

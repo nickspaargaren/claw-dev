@@ -5,7 +5,7 @@ import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
 
-export type ToolDefinition = {
+type ToolDefinition = {
   name: string;
   description: string;
   input_schema: {
@@ -15,12 +15,12 @@ export type ToolDefinition = {
   };
 };
 
-export type ToolResult = {
+type ToolResult = {
   isError?: boolean;
   content: string;
 };
 
-export type ToolHandler = (input: Record<string, unknown>, cwd: string) => Promise<ToolResult>;
+type ToolHandler = (input: Record<string, unknown>, cwd: string) => Promise<ToolResult>;
 
 function resolveWithinCwd(cwd: string, maybeRelative: string): string {
   const resolved = path.resolve(cwd, maybeRelative);

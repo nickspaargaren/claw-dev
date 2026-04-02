@@ -5,7 +5,7 @@ import type { TextStyles } from './styles.js'
  * A segment of text with its associated styles.
  * Used for structured rendering without ANSI string transforms.
  */
-export type StyledSegment = {
+type StyledSegment = {
   text: string
   styles: TextStyles
   hyperlink?: string
@@ -15,7 +15,7 @@ export type StyledSegment = {
  * Squash text nodes into styled segments, propagating styles down through the tree.
  * This allows structured styling without relying on ANSI string transforms.
  */
-export function squashTextNodesToSegments(
+function squashTextNodesToSegments(
   node: DOMElement,
   inheritedStyles: TextStyles = {},
   inheritedHyperlink?: string,

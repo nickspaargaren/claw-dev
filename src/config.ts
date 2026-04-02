@@ -14,7 +14,7 @@ const envSchema = z.object({
   GEMINI_MODEL: z.string().min(1).default("gemini-2.5-flash"),
 });
 
-export type AppConfig = {
+type AppConfig = {
   provider: ProviderName;
   apiKey: string;
   model: string;

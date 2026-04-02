@@ -13,7 +13,7 @@ export const getClaudeConfigHomeDir = memoize(
   () => process.env.CLAUDE_CONFIG_DIR,
 )
 
-export function getTeamsDir(): string {
+function getTeamsDir(): string {
   return join(getClaudeConfigHomeDir(), 'teams')
 }
 
@@ -21,7 +21,7 @@ export function getTeamsDir(): string {
  * Check if NODE_OPTIONS contains a specific flag.
  * Splits on whitespace and checks for exact match to avoid false positives.
  */
-export function hasNodeOption(flag: string): boolean {
+function hasNodeOption(flag: string): boolean {
   const nodeOptions = process.env.NODE_OPTIONS
   if (!nodeOptions) {
     return false
@@ -36,7 +36,7 @@ export function isEnvTruthy(envVar: string | boolean | undefined): boolean {
   return ['1', 'true', 'yes', 'on'].includes(normalizedValue)
 }
 
-export function isEnvDefinedFalsy(
+function isEnvDefinedFalsy(
   envVar: string | boolean | undefined,
 ): boolean {
   if (envVar === undefined) return false
@@ -57,7 +57,7 @@ export function isEnvDefinedFalsy(
  * run before main.tsx's action handler sets CLAUDE_CODE_SIMPLE=1 from --bare
  * — notably startKeychainPrefetch() at main.tsx top-level.
  */
-export function isBareMode(): boolean {
+function isBareMode(): boolean {
   return (
     isEnvTruthy(process.env.CLAUDE_CODE_SIMPLE) ||
     process.argv.includes('--bare')
@@ -69,7 +69,7 @@ export function isBareMode(): boolean {
  * @param envVars Array of strings in KEY=VALUE format
  * @returns Object with key-value pairs
  */
-export function parseEnvVars(
+function parseEnvVars(
   rawEnvArgs: string[] | undefined,
 ): Record<string, string> {
   const parsedEnv: Record<string, string> = {}
@@ -93,14 +93,14 @@ export function parseEnvVars(
  * Get the AWS region with fallback to default
  * Matches the Anthropic Bedrock SDK's region behavior
  */
-export function getAWSRegion(): string {
+function getAWSRegion(): string {
   return process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1'
 }
 
 /**
  * Get the default Vertex AI region
  */
-export function getDefaultVertexRegion(): string {
+function getDefaultVertexRegion(): string {
   return process.env.CLOUD_ML_REGION || 'us-east5'
 }
 
@@ -108,14 +108,14 @@ export function getDefaultVertexRegion(): string {
  * Check if bash commands should maintain project working directory (reset to original after each command)
  * @returns true if CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR is set to a truthy value
  */
-export function shouldMaintainProjectWorkingDir(): boolean {
+function shouldMaintainProjectWorkingDir(): boolean {
   return isEnvTruthy(process.env.CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR)
 }
 
 /**
  * Check if running on Homespace (ant-internal cloud environment)
  */
-export function isRunningOnHomespace(): boolean {
+function isRunningOnHomespace(): boolean {
   return (
     process.env.USER_TYPE === 'ant' &&
     isEnvTruthy(process.env.COO_RUNNING_ON_HOMESPACE)
@@ -133,7 +133,7 @@ export function isRunningOnHomespace(): boolean {
  *
  * Used for telemetry to measure auto-mode usage in sensitive environments.
  */
-export function isInProtectedNamespace(): boolean {
+function isInProtectedNamespace(): boolean {
   // USER_TYPE is build-time --define'd; in external builds this block is
   // DCE'd so the require() and namespace allowlist never appear in the bundle.
   if (process.env.USER_TYPE === 'ant') {
@@ -168,7 +168,7 @@ const VERTEX_REGION_OVERRIDES: ReadonlyArray<[string, string]> = [
  * Get the Vertex AI region for a specific model.
  * Different models may be available in different regions.
  */
-export function getVertexRegionForModel(
+function getVertexRegionForModel(
   model: string | undefined,
 ): string | undefined {
   if (model) {

@@ -62,7 +62,7 @@ export const ESC_TYPE = {
 } as const
 
 /** Check if a byte is a C0 control character */
-export function isC0(byte: number): boolean {
+function isC0(byte: number): boolean {
   return byte < 0x20 || byte === 0x7f
 }
 
