@@ -20,7 +20,7 @@ import { slowLogging } from './slowOperations.js'
  * Provides a subset of commonly used sync operations with type safety.
  * Allows abstraction for alternative implementations (e.g., mock, virtual).
  */
-export type FsOperations = {
+type FsOperations = {
   // File access and information operations
   /** Gets the current working directory */
   cwd(): string
@@ -135,7 +135,7 @@ export type FsOperations = {
  * @param filePath The path to resolve
  * @returns Object containing the resolved path and whether it was a symlink
  */
-export function safeResolvePath(
+function safeResolvePath(
   fs: FsOperations,
   filePath: string,
 ): { resolvedPath: string; isSymlink: boolean; isCanonical: boolean } {
@@ -184,7 +184,7 @@ export function safeResolvePath(
  *
  * @returns true if the file should be skipped (is duplicate)
  */
-export function isDuplicatePath(
+function isDuplicatePath(
   fs: FsOperations,
   filePath: string,
   loadedPaths: Set<string>,
@@ -212,7 +212,7 @@ export function isDuplicatePath(
  * Handles: live parent symlinks, dangling file symlinks, dangling parent
  * symlinks. Same core algorithm as teamMemPaths.ts:realpathDeepestExisting.
  */
-export function resolveDeepestExistingAncestorSync(
+function resolveDeepestExistingAncestorSync(
   fs: FsOperations,
   absolutePath: string,
 ): string | undefined {
@@ -285,7 +285,7 @@ export function resolveDeepestExistingAncestorSync(
  * @param path - The path to check (will be converted to absolute)
  * @returns An array of absolute paths to check permissions for
  */
-export function getPathsForPermissionCheck(inputPath: string): string[] {
+function getPathsForPermissionCheck(inputPath: string): string[] {
   // Expand tilde notation defensively - tools should do this in getPath(),
   // but we normalize here as defense in depth for permission checking
   let path = inputPath
@@ -381,7 +381,7 @@ export function getPathsForPermissionCheck(inputPath: string): string[] {
   return Array.from(pathSet)
 }
 
-export const NodeFsOperations: FsOperations = {
+const NodeFsOperations: FsOperations = {
   cwd() {
     return process.cwd()
   },
@@ -610,7 +610,7 @@ let activeFs: FsOperations = NodeFsOperations
  * automatically update cwd.
  * @param implementation The filesystem implementation to use
  */
-export function setFsImplementation(implementation: FsOperations): void {
+function setFsImplementation(implementation: FsOperations): void {
   activeFs = implementation
 }
 
@@ -626,11 +626,11 @@ export function getFsImplementation(): FsOperations {
  * Resets the filesystem implementation to the default Node.js implementation.
  * Note: This function does not automatically update cwd.
  */
-export function setOriginalFsImplementation(): void {
+function setOriginalFsImplementation(): void {
   activeFs = NodeFsOperations
 }
 
-export type ReadFileRangeResult = {
+type ReadFileRangeResult = {
   content: string
   bytesRead: number
   bytesTotal: number
@@ -641,7 +641,7 @@ export type ReadFileRangeResult = {
  * Returns a flat string from Buffer — no sliced string references to a
  * larger parent. Returns null if the file is smaller than the offset.
  */
-export async function readFileRange(
+async function readFileRange(
   path: string,
   offset: number,
   maxBytes: number,
@@ -679,7 +679,7 @@ export async function readFileRange(
  * Read the last `maxBytes` of a file.
  * Returns the whole file if it's smaller than maxBytes.
  */
-export async function tailFile(
+async function tailFile(
   path: string,
   maxBytes: number,
 ): Promise<ReadFileRangeResult> {
@@ -719,7 +719,7 @@ export async function tailFile(
  * @param path - The path to the file to read
  * @returns An async generator that yields lines in reverse order
  */
-export async function* readLinesReverse(
+async function* readLinesReverse(
   path: string,
 ): AsyncGenerator<string, void, undefined> {
   const CHUNK_SIZE = 1024 * 4

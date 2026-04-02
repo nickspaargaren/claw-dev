@@ -1,15 +1,15 @@
 import { APIUserAbortError } from '@anthropic-ai/sdk'
 
-export class ClaudeError extends Error {
+class ClaudeError extends Error {
   constructor(message: string) {
     super(message)
     this.name = this.constructor.name
   }
 }
 
-export class MalformedCommandError extends Error {}
+class MalformedCommandError extends Error {}
 
-export class AbortError extends Error {
+class AbortError extends Error {
   constructor(message?: string) {
     super(message)
     this.name = 'AbortError'
@@ -24,7 +24,7 @@ export class AbortError extends Error {
  * constructor.name becomes something like 'nJT' and the SDK never sets
  * this.name, so string matching silently fails in production.
  */
-export function isAbortError(e: unknown): boolean {
+function isAbortError(e: unknown): boolean {
   return (
     e instanceof AbortError ||
     e instanceof APIUserAbortError ||
@@ -36,7 +36,7 @@ export function isAbortError(e: unknown): boolean {
  * Custom error class for configuration file parsing errors
  * Includes the file path and the default configuration that should be used
  */
-export class ConfigParseError extends Error {
+class ConfigParseError extends Error {
   filePath: string
   defaultConfig: unknown
 
@@ -48,7 +48,7 @@ export class ConfigParseError extends Error {
   }
 }
 
-export class ShellError extends Error {
+class ShellError extends Error {
   constructor(
     public readonly stdout: string,
     public readonly stderr: string,
@@ -60,7 +60,7 @@ export class ShellError extends Error {
   }
 }
 
-export class TeleportOperationError extends Error {
+class TeleportOperationError extends Error {
   constructor(
     message: string,
     public readonly formattedMessage: string,
@@ -90,7 +90,7 @@ export class TeleportOperationError extends Error {
  *   'MCP tool timed out'                  // Telemetry message
  * )
  */
-export class TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS extends Error {
+class TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS extends Error {
   readonly telemetryMessage: string
 
   constructor(message: string, telemetryMessage?: string) {
@@ -100,7 +100,7 @@ export class TelemetrySafeError_I_VERIFIED_THIS_IS_NOT_CODE_OR_FILEPATHS extends
   }
 }
 
-export function hasExactErrorMessage(error: unknown, message: string): boolean {
+function hasExactErrorMessage(error: unknown, message: string): boolean {
   return error instanceof Error && error.message === message
 }
 
@@ -108,7 +108,7 @@ export function hasExactErrorMessage(error: unknown, message: string): boolean {
  * Normalize an unknown value into an Error.
  * Use at catch-site boundaries when you need an Error instance.
  */
-export function toError(e: unknown): Error {
+function toError(e: unknown): Error {
   return e instanceof Error ? e : new Error(String(e))
 }
 
@@ -116,7 +116,7 @@ export function toError(e: unknown): Error {
  * Extract a string message from an unknown error-like value.
  * Use when you only need the message (e.g., for logging or display).
  */
-export function errorMessage(e: unknown): string {
+function errorMessage(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
@@ -136,7 +136,7 @@ export function getErrnoCode(e: unknown): string | undefined {
  * True if the error is ENOENT (file or directory does not exist).
  * Replaces `(e as NodeJS.ErrnoException).code === 'ENOENT'`.
  */
-export function isENOENT(e: unknown): boolean {
+function isENOENT(e: unknown): boolean {
   return getErrnoCode(e) === 'ENOENT'
 }
 
@@ -145,7 +145,7 @@ export function isENOENT(e: unknown): boolean {
  * from a caught error. Returns undefined if the error has no path.
  * Replaces the `(e as NodeJS.ErrnoException).path` cast pattern.
  */
-export function getErrnoPath(e: unknown): string | undefined {
+function getErrnoPath(e: unknown): string | undefined {
   if (e && typeof e === 'object' && 'path' in e && typeof e.path === 'string') {
     return e.path
   }
@@ -158,7 +158,7 @@ export function getErrnoPath(e: unknown): string | undefined {
  * traces are ~500-2000 chars of mostly-irrelevant internal frames and
  * waste context tokens. Keep the full stack in debug logs instead.
  */
-export function shortErrorStack(e: unknown, maxFrames = 5): string {
+function shortErrorStack(e: unknown, maxFrames = 5): string {
   if (!(e instanceof Error)) return String(e)
   if (!e.stack) return e.message
   // V8/Bun stack format: "Name: message\n    at frame1\n    at frame2..."
@@ -183,7 +183,7 @@ export function shortErrorStack(e: unknown, maxFrames = 5): string {
  *              `.claude` exists where a directory is expected)
  *  ELOOP     — too many symlink levels (circular symlinks)
  */
-export function isFsInaccessible(e: unknown): e is NodeJS.ErrnoException {
+function isFsInaccessible(e: unknown): e is NodeJS.ErrnoException {
   const code = getErrnoCode(e)
   return (
     code === 'ENOENT' ||
@@ -194,7 +194,7 @@ export function isFsInaccessible(e: unknown): e is NodeJS.ErrnoException {
   )
 }
 
-export type AxiosErrorKind =
+type AxiosErrorKind =
   | 'auth' // 401/403 — caller typically sets skipRetry
   | 'timeout' // ECONNABORTED
   | 'network' // ECONNREFUSED/ENOTFOUND
@@ -210,7 +210,7 @@ export type AxiosErrorKind =
  * Checks the `.isAxiosError` marker property directly (same as
  * axios.isAxiosError()) to keep this module dependency-free.
  */
-export function classifyAxiosError(e: unknown): {
+function classifyAxiosError(e: unknown): {
   kind: AxiosErrorKind
   status?: number
   message: string

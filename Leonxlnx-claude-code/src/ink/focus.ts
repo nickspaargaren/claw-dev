@@ -163,7 +163,7 @@ function isInTree(node: DOMElement, root: DOMElement): boolean {
  * Walk up to root and return it. The root is the node that holds
  * the FocusManager — like browser's `node.getRootNode()`.
  */
-export function getRootNode(node: DOMElement): DOMElement {
+function getRootNode(node: DOMElement): DOMElement {
   let current: DOMElement | undefined = node
   while (current) {
     if (current.focusManager) return current
@@ -176,6 +176,6 @@ export function getRootNode(node: DOMElement): DOMElement {
  * Walk up to root and return its FocusManager.
  * Like browser's `node.ownerDocument` — focus belongs to the root.
  */
-export function getFocusManager(node: DOMElement): FocusManager {
+function getFocusManager(node: DOMElement): FocusManager {
   return getRootNode(node).focusManager!
 }

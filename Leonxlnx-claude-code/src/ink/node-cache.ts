@@ -7,7 +7,7 @@ import type { Rectangle } from './layout/geometry.js'
  * culling can skip yoga reads for clean children whose position hasn't
  * shifted (O(dirty) instead of O(mounted) first-pass).
  */
-export type CachedLayout = {
+type CachedLayout = {
   x: number
   y: number
   width: number
@@ -18,7 +18,7 @@ export type CachedLayout = {
 export const nodeCache = new WeakMap<DOMElement, CachedLayout>()
 
 /** Rects of removed children that need clearing on next render */
-export const pendingClears = new WeakMap<DOMElement, Rectangle[]>()
+const pendingClears = new WeakMap<DOMElement, Rectangle[]>()
 
 /**
  * Set when a pendingClear is added for an absolute-positioned node.
@@ -47,7 +47,7 @@ export function addPendingClear(
   }
 }
 
-export function consumeAbsoluteRemovedFlag(): boolean {
+function consumeAbsoluteRemovedFlag(): boolean {
   const had = absoluteNodeRemoved
   absoluteNodeRemoved = false
   return had

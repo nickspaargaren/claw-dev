@@ -20,6 +20,6 @@ export function registerCleanup(cleanupFn: () => Promise<void>): () => void {
  * Run all registered cleanup functions.
  * Used internally by gracefulShutdown.
  */
-export async function runCleanupFunctions(): Promise<void> {
+async function runCleanupFunctions(): Promise<void> {
   await Promise.all(Array.from(cleanupFunctions).map(fn => fn()))
 }

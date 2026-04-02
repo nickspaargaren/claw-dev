@@ -44,7 +44,7 @@ const SLOW_OPERATION_THRESHOLD_MS = (() => {
 })()
 
 // Re-export for callers that still need the threshold value directly
-export { SLOW_OPERATION_THRESHOLD_MS }
+
 
 // Module-level re-entrancy guard. logForDebugging writes to a debug file via
 // appendFileSync, which goes through slowLogging again. Without this guard,
@@ -56,7 +56,7 @@ let isLogging = false
  * points at the actual caller instead of a useless `Object{N keys}`.
  * Only called when an operation was actually slow — never on the fast path.
  */
-export function callerFrame(stack: string | undefined): string {
+function callerFrame(stack: string | undefined): string {
   if (!stack) return ''
   for (const line of stack.split('\n')) {
     if (line.includes('slowOperations')) continue
@@ -201,7 +201,7 @@ export function jsonStringify(
  * import { jsonParse } from './slowOperations.js'
  * const data = jsonParse(jsonString)
  */
-export const jsonParse: typeof JSON.parse = (text, reviver) => {
+const jsonParse: typeof JSON.parse = (text, reviver) => {
   using _ = slowLogging`JSON.parse(${text})`
   // V8 de-opts JSON.parse when a second argument is passed, even if undefined.
   // Branch explicitly so the common (no-reviver) path stays on the fast path.
@@ -218,7 +218,7 @@ export const jsonParse: typeof JSON.parse = (text, reviver) => {
  * import { clone } from './slowOperations.js'
  * const copy = clone(originalObject)
  */
-export function clone<T>(value: T, options?: StructuredSerializeOptions): T {
+function clone<T>(value: T, options?: StructuredSerializeOptions): T {
   using _ = slowLogging`structuredClone(${value})`
   return structuredClone(value, options)
 }
@@ -231,7 +231,7 @@ export function clone<T>(value: T, options?: StructuredSerializeOptions): T {
  * import { cloneDeep } from './slowOperations.js'
  * const copy = cloneDeep(originalObject)
  */
-export function cloneDeep<T>(value: T): T {
+function cloneDeep<T>(value: T): T {
   using _ = slowLogging`cloneDeep(${value})`
   return lodashCloneDeep(value)
 }
@@ -245,7 +245,7 @@ export function cloneDeep<T>(value: T): T {
  * @deprecated Use `fs.promises.writeFile` instead for non-blocking writes.
  * Sync file writes block the event loop and cause performance issues.
  */
-export function writeFileSync_DEPRECATED(
+function writeFileSync_DEPRECATED(
   filePath: string,
   data: string | NodeJS.ArrayBufferView,
   options?: WriteFileOptionsWithFlush,

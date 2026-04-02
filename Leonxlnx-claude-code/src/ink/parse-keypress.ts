@@ -81,7 +81,7 @@ function createPasteKey(content: string): ParsedKey {
 }
 
 /** DECRPM status values (response to DECRQM) */
-export const DECRPM_STATUS = {
+const DECRPM_STATUS = {
   NOT_RECOGNIZED: 0,
   SET: 1,
   RESET: 2,
@@ -93,7 +93,7 @@ export const DECRPM_STATUS = {
  * A response sequence received from the terminal (not a keypress).
  * Emitted in answer to queries like DECRQM, DA1, OSC 11, etc.
  */
-export type TerminalResponse =
+type TerminalResponse =
   /** DECRPM: answer to DECRQM (request DEC private mode status) */
   | { type: 'decrpm'; mode: number; status: number }
   /** DA1: primary device attributes (used as a universal sentinel) */
@@ -179,7 +179,7 @@ function splitNumericParams(params: string): number[] {
   return params.split(';').map(p => parseInt(p, 10))
 }
 
-export type KeyParseState = {
+type KeyParseState = {
   mode: 'NORMAL' | 'IN_PASTE'
   incomplete: string
   pasteBuffer: string
@@ -187,7 +187,7 @@ export type KeyParseState = {
   _tokenizer?: Tokenizer
 }
 
-export const INITIAL_STATE: KeyParseState = {
+const INITIAL_STATE: KeyParseState = {
   mode: 'NORMAL',
   incomplete: '',
   pasteBuffer: '',
@@ -210,7 +210,7 @@ function inputToString(input: Buffer | string): string {
   }
 }
 
-export function parseMultipleKeypresses(
+function parseMultipleKeypresses(
   prevState: KeyParseState,
   input: Buffer | string | null = '',
 ): [ParsedInput[], KeyParseState] {
@@ -405,7 +405,7 @@ const keyName: Record<string, string> = {
   '[Z': 'tab',
 }
 
-export const nonAlphanumericKeys = [
+const nonAlphanumericKeys = [
   // Filter out single-character values (digits, operators from numpad) since
   // those are printable characters that should produce input
   ...Object.values(keyName).filter(v => v.length > 1),
@@ -558,7 +558,7 @@ export type ParsedKey = {
 /** A terminal response sequence (DECRPM, DA1, OSC reply, etc.) parsed
  *  out of the input stream. Not user input — consumers should dispatch
  *  to a response handler. */
-export type ParsedResponse = {
+type ParsedResponse = {
   kind: 'response'
   /** Raw escape sequence bytes, for debugging/logging */
   sequence: string
@@ -568,7 +568,7 @@ export type ParsedResponse = {
 /** SGR mouse event with coordinates. Emitted for clicks, drags, and
  *  releases (wheel events remain ParsedKey). col/row are 1-indexed
  *  from the terminal sequence (CSI < btn;col;row M/m). */
-export type ParsedMouse = {
+type ParsedMouse = {
   kind: 'mouse'
   /** Raw SGR button code. Low 2 bits = button (0=left,1=mid,2=right),
    *  bit 5 (0x20) = drag/motion, bit 6 (0x40) = wheel. */
@@ -584,7 +584,7 @@ export type ParsedMouse = {
 
 /** Everything that can come out of the input parser: a user keypress/paste,
  *  a mouse click/drag event, or a terminal response to a query we sent. */
-export type ParsedInput = ParsedKey | ParsedMouse | ParsedResponse
+type ParsedInput = ParsedKey | ParsedMouse | ParsedResponse
 
 /**
  * Parse an SGR mouse event sequence into a ParsedMouse, or null if not a

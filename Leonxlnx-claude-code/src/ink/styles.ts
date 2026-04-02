@@ -768,4 +768,3 @@ const styles = (
   applyGapStyles(node, style)
 }
 
-export default styles

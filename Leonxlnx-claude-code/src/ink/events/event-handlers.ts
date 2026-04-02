@@ -41,7 +41,7 @@ export type EventHandlerProps = {
  * Reverse lookup: event type string → handler prop names.
  * Used by the dispatcher for O(1) handler lookup per node.
  */
-export const HANDLER_FOR_EVENT: Record<
+const HANDLER_FOR_EVENT: Record<
   string,
   { bubble?: keyof EventHandlerProps; capture?: keyof EventHandlerProps }
 > = {
@@ -57,7 +57,7 @@ export const HANDLER_FOR_EVENT: Record<
  * Set of all event handler prop names, for the reconciler to detect
  * event props and store them in _eventHandlers instead of attributes.
  */
-export const EVENT_HANDLER_PROPS = new Set<string>([
+const EVENT_HANDLER_PROPS = new Set<string>([
   'onKeyDown',
   'onKeyDownCapture',
   'onFocus',

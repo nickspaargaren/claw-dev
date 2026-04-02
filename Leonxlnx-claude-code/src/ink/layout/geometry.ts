@@ -11,7 +11,7 @@ export type Size = {
 export type Rectangle = Point & Size
 
 /** Edge insets (padding, margin, border) */
-export type Edges = {
+type Edges = {
   top: number
   right: number
   bottom: number
@@ -19,15 +19,15 @@ export type Edges = {
 }
 
 /** Create uniform edges */
-export function edges(all: number): Edges
-export function edges(vertical: number, horizontal: number): Edges
-export function edges(
+function edges(all: number): Edges
+function edges(vertical: number, horizontal: number): Edges
+function edges(
   top: number,
   right: number,
   bottom: number,
   left: number,
 ): Edges
-export function edges(a: number, b?: number, c?: number, d?: number): Edges {
+function edges(a: number, b?: number, c?: number, d?: number): Edges {
   if (b === undefined) {
     return { top: a, right: a, bottom: a, left: a }
   }
@@ -38,7 +38,7 @@ export function edges(a: number, b?: number, c?: number, d?: number): Edges {
 }
 
 /** Add two edge values */
-export function addEdges(a: Edges, b: Edges): Edges {
+function addEdges(a: Edges, b: Edges): Edges {
   return {
     top: a.top + b.top,
     right: a.right + b.right,
@@ -48,10 +48,10 @@ export function addEdges(a: Edges, b: Edges): Edges {
 }
 
 /** Zero edges constant */
-export const ZERO_EDGES: Edges = { top: 0, right: 0, bottom: 0, left: 0 }
+const ZERO_EDGES: Edges = { top: 0, right: 0, bottom: 0, left: 0 }
 
 /** Convert partial edges to full edges with defaults */
-export function resolveEdges(partial?: Partial<Edges>): Edges {
+function resolveEdges(partial?: Partial<Edges>): Edges {
   return {
     top: partial?.top ?? 0,
     right: partial?.right ?? 0,
@@ -68,7 +68,7 @@ export function unionRect(a: Rectangle, b: Rectangle): Rectangle {
   return { x: minX, y: minY, width: maxX - minX, height: maxY - minY }
 }
 
-export function clampRect(rect: Rectangle, size: Size): Rectangle {
+function clampRect(rect: Rectangle, size: Size): Rectangle {
   const minX = Math.max(0, rect.x)
   const minY = Math.max(0, rect.y)
   const maxX = Math.min(size.width - 1, rect.x + rect.width - 1)
@@ -81,7 +81,7 @@ export function clampRect(rect: Rectangle, size: Size): Rectangle {
   }
 }
 
-export function withinBounds(size: Size, point: Point): boolean {
+function withinBounds(size: Size, point: Point): boolean {
   return (
     point.x >= 0 &&
     point.y >= 0 &&
@@ -90,7 +90,7 @@ export function withinBounds(size: Size, point: Point): boolean {
   )
 }
 
-export function clamp(value: number, min?: number, max?: number): number {
+function clamp(value: number, min?: number, max?: number): number {
   if (min !== undefined && value < min) return min
   if (max !== undefined && value > max) return max
   return value

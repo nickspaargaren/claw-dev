@@ -23,7 +23,7 @@ export function getGraphemeSegmenter(): Intl.Segmenter {
  * Extract the first grapheme cluster from a string.
  * Returns '' for empty strings.
  */
-export function firstGrapheme(text: string): string {
+function firstGrapheme(text: string): string {
   if (!text) return ''
   const segments = getGraphemeSegmenter().segment(text)
   const first = segments[Symbol.iterator]().next().value
@@ -34,7 +34,7 @@ export function firstGrapheme(text: string): string {
  * Extract the last grapheme cluster from a string.
  * Returns '' for empty strings.
  */
-export function lastGrapheme(text: string): string {
+function lastGrapheme(text: string): string {
   if (!text) return ''
   let last = ''
   for (const { segment } of getGraphemeSegmenter().segment(text)) {
@@ -43,7 +43,7 @@ export function lastGrapheme(text: string): string {
   return last
 }
 
-export function getWordSegmenter(): Intl.Segmenter {
+function getWordSegmenter(): Intl.Segmenter {
   if (!wordSegmenter) {
     wordSegmenter = new Intl.Segmenter(undefined, { granularity: 'word' })
   }
@@ -53,7 +53,7 @@ export function getWordSegmenter(): Intl.Segmenter {
 // RelativeTimeFormat cache (keyed by style:numeric)
 const rtfCache = new Map<string, Intl.RelativeTimeFormat>()
 
-export function getRelativeTimeFormat(
+function getRelativeTimeFormat(
   style: 'long' | 'short' | 'narrow',
   numeric: 'always' | 'auto',
 ): Intl.RelativeTimeFormat {
@@ -69,7 +69,7 @@ export function getRelativeTimeFormat(
 // Timezone is constant for the process lifetime
 let cachedTimeZone: string | null = null
 
-export function getTimeZone(): string {
+function getTimeZone(): string {
   if (!cachedTimeZone) {
     cachedTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
   }
@@ -81,7 +81,7 @@ export function getTimeZone(): string {
 // a stripped-ICU environment fails once instead of retrying on every call).
 let cachedSystemLocaleLanguage: string | undefined | null = null
 
-export function getSystemLocaleLanguage(): string | undefined {
+function getSystemLocaleLanguage(): string | undefined {
   if (cachedSystemLocaleLanguage === null) {
     try {
       const locale = Intl.DateTimeFormat().resolvedOptions().locale

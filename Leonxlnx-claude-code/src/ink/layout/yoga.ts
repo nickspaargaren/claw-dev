@@ -51,7 +51,7 @@ const GUTTER_MAP: Record<LayoutGutter, Gutter> = {
 // --
 // Yoga adapter
 
-export class YogaLayoutNode implements LayoutNode {
+class YogaLayoutNode implements LayoutNode {
   readonly yoga: YogaNode
 
   constructor(yoga: YogaNode) {

@@ -299,13 +299,13 @@ export const enum CellWidth {
   SpacerHead = 3,
 }
 
-export type Hyperlink = string | undefined
+type Hyperlink = string | undefined
 
 /**
  * Cell is a view type returned by cellAt(). Cells are stored as packed typed
  * arrays internally to avoid GC pressure from allocating objects per cell.
  */
-export type Cell = {
+type Cell = {
   char: string
   styleId: number
   width: CellWidth
@@ -421,7 +421,7 @@ function isEmptyCellByIndex(screen: Screen, index: number): boolean {
   return screen.cells[ci] === 0 && screen.cells[ci | 1] === 0
 }
 
-export function isEmptyCellAt(screen: Screen, x: number, y: number): boolean {
+function isEmptyCellAt(screen: Screen, x: number, y: number): boolean {
   if (x < 0 || y < 0 || x >= screen.width || y >= screen.height) return true
   return isEmptyCellByIndex(screen, y * screen.width + x)
 }
@@ -429,7 +429,7 @@ export function isEmptyCellAt(screen: Screen, x: number, y: number): boolean {
 /**
  * Check if a Cell (view object) represents an empty cell.
  */
-export function isCellEmpty(screen: Screen, cell: Cell): boolean {
+function isCellEmpty(screen: Screen, cell: Cell): boolean {
   // Check if cell looks like an empty cell (space, empty style, narrow, no link).
   // Note: After cellAt mapping, unwritten cells have emptyStyleId, so this
   // returns true for both unwritten AND cleared cells. Use isEmptyCellAt
@@ -448,7 +448,7 @@ function internHyperlink(screen: Screen, hyperlink: Hyperlink): number {
 
 // ---
 
-export function createScreen(
+function createScreen(
   width: number,
   height: number,
   styles: StylePool,
@@ -551,7 +551,7 @@ export function resetScreen(
  *
  * O(width * height) but only called occasionally (e.g., between conversation turns).
  */
-export function migrateScreenPools(
+function migrateScreenPools(
   screen: Screen,
   charPool: CharPool,
   hyperlinkPool: HyperlinkPool,
@@ -590,7 +590,7 @@ export function migrateScreenPools(
  * Get a Cell view at the given position. Returns a new object each call -
  * this is intentional as cells are stored packed, not as objects.
  */
-export function cellAt(screen: Screen, x: number, y: number): Cell | undefined {
+function cellAt(screen: Screen, x: number, y: number): Cell | undefined {
   if (x < 0 || y < 0 || x >= screen.width || y >= screen.height)
     return undefined
   return cellAtIndex(screen, y * screen.width + x)
@@ -599,7 +599,7 @@ export function cellAt(screen: Screen, x: number, y: number): Cell | undefined {
  * Get a Cell view by pre-computed array index. Skips bounds checks and
  * index computation — caller must ensure index is valid.
  */
-export function cellAtIndex(screen: Screen, index: number): Cell {
+function cellAtIndex(screen: Screen, index: number): Cell {
   const ci = index << 1
   const word1 = screen.cells[ci + 1]!
   const hid = (word1 >>> HYPERLINK_SHIFT) & HYPERLINK_MASK
@@ -621,7 +621,7 @@ export function cellAtIndex(screen: Screen, index: number): Cell {
  * @param lastRenderedStyleId - styleId of the last rendered cell on this
  *   line, or -1 if none yet.
  */
-export function visibleCellAtIndex(
+function visibleCellAtIndex(
   cells: Int32Array,
   charPool: CharPool,
   hyperlinkPool: HyperlinkPool,
@@ -663,7 +663,7 @@ function cellAtCI(screen: Screen, ci: number, out: Cell): void {
   out.hyperlink = hid === 0 ? undefined : screen.hyperlinkPool.get(hid)
 }
 
-export function charInCellAt(
+function charInCellAt(
   screen: Screen,
   x: number,
   y: number,
@@ -814,7 +814,7 @@ export function setCellAt(
  * or hyperlink. Preserves empty cells as-is (char stays ' '). Tracks damage
  * for the cell so diffEach picks up the change.
  */
-export function setCellStyleId(
+function setCellStyleId(
   screen: Screen,
   x: number,
   y: number,
@@ -956,7 +956,7 @@ export function blitRegion(
  * Uses BigInt64Array.fill() for fast row clears.
  * Handles wide character boundary cleanup at region edges.
  */
-export function clearRegion(
+function clearRegion(
   screen: Screen,
   regionX: number,
   regionY: number,
@@ -1123,7 +1123,7 @@ export function filterOutHyperlinkStyles(styles: AnsiCode[]): AnsiCode[] {
  * Returns an array of all changes between two screens. Used by tests.
  * Production code should use diffEach() to avoid allocations.
  */
-export function diff(
+function diff(
   prev: Screen,
   next: Screen,
 ): [point: Point, removed: Cell | undefined, added: Cell | undefined][] {
@@ -1153,7 +1153,7 @@ type DiffCallback = (
  *
  * Returns true if the callback ever returned true (early exit signal).
  */
-export function diffEach(
+function diffEach(
   prev: Screen,
   next: Screen,
   cb: DiffCallback,
