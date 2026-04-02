@@ -143,7 +143,7 @@ From the repository root on Windows:
 
 ```powershell
 cd E:\myclaudecode
-npm install
+pnpm install
 copy .env.example .env
 ```
 
@@ -151,7 +151,7 @@ From the repository root on macOS or Linux:
 
 ```bash
 cd /path/to/myclaudecode
-npm install
+pnpm install
 cp .env.example .env
 ```
 
@@ -162,13 +162,13 @@ Editing `.env` is optional. Claw Dev can prompt for missing values interactively
 Start Claw Dev from the repository root on any platform:
 
 ```bash
-npm run claw-dev
+pnpm run claw-dev
 ```
 
-`npm start` is an alias for the same launcher:
+`pnpm start` is an alias for the same launcher:
 
 ```bash
-npm start
+pnpm start
 ```
 
 Or launch it directly from the bundled client directory on Windows:
@@ -312,7 +312,7 @@ http://127.0.0.1:11434
 
 ```powershell
 cd E:\myclaudecode
-npm run claw-dev
+pnpm run claw-dev
 ```
 
 Then choose:
@@ -359,7 +359,7 @@ This shows which models are currently loaded and whether they are using CPU, GPU
 You can also confirm that the Claw Dev proxy is healthy:
 
 ```powershell
-npm run proxy:compat
+pnpm run proxy:compat
 ```
 
 Then open:
@@ -797,8 +797,8 @@ That usually means Claw Dev is working correctly, but the local Ollama server is
 If you hand this repository to someone else, the shortest setup path is:
 
 1. Install Node.js 22 or newer
-2. Run `npm install`
-3. Start `npm start` or `npm run claw-dev`
+2. Run `pnpm install`
+3. Start `pnpm start` or `pnpm run claw-dev`
 4. Choose a provider
 5. Supply credentials or run Ollama locally
 
@@ -809,9 +809,9 @@ They do not need a separate global installation of the bundled client in order t
 Useful checks:
 
 ```powershell
-npm run check
-npm run build
-npm run claw-dev -- --version
+pnpm run check
+pnpm run build
+pnpm run claw-dev -- --version
 ```
 
 ## References
