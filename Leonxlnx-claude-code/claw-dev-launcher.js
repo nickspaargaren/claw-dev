@@ -77,10 +77,12 @@ async function main() {
     }
 
     if (provider === "bedrock") {
+      ensureSeparateConfigDir(env);
       await configureNativeBedrock(env, rl, modelArg);
       return launchBundledClient(env, forwardArgs);
     }
 
+    ensureSeparateConfigDir(env);
     await configureCompatProvider(provider, env, rl, modelArg);
     await ensureCompatProxy(provider, env);
     env.ANTHROPIC_BASE_URL = `http://127.0.0.1:${env.ANTHROPIC_COMPAT_PORT}`;
@@ -284,8 +286,10 @@ async function configureAnthropic(env, rl) {
   printProviderStartSummary("anthropic", [
     "Launching direct Anthropic mode.",
     "This path talks to Anthropic without the local compatibility proxy.",
-    "Claw Dev uses Anthropic API-key mode here to avoid mixed login and API auth conflicts.",
   ]);
+
+  // Separate config dir so Claw Dev never touches real Claude Code data
+  ensureSeparateConfigDir(env);
 
   const configuredKey = readConfiguredSecret(env, "ANTHROPIC_API_KEY");
   if (configuredKey) {
@@ -295,13 +299,77 @@ async function configureAnthropic(env, rl) {
     return;
   }
 
+  // Check if OAuth credentials exist (from `claude login` or Claude Max subscription)
+  const oauthCreds = readOAuthCredentials(env);
+  if (oauthCreds) {
+    process.stdout.write("\nAnthropic auth method\n");
+    process.stdout.write("1. OAuth login (Claude Pro/Max — uses existing claude.ai login)\n");
+    process.stdout.write("2. API key (ANTHROPIC_API_KEY)\n");
+    const choice = (await rl.question("Choose auth method [1]: ")).trim() || "1";
+
+    if (choice === "1") {
+      // OAuth mode: don't set ANTHROPIC_API_KEY, let the bundled client use its own OAuth flow
+      process.stdout.write(`Using OAuth login (${oauthCreds.subscriptionType || "claude.ai"}).\n`);
+      process.stdout.write("Sessions and credentials are isolated from stock Claude Code.\n");
+      return;
+    }
+  }
+
   const key = (await rl.question("Enter ANTHROPIC_API_KEY (input is visible): ")).trim();
   if (!key) {
-    throw new Error("Anthropic mode in Claw Dev requires ANTHROPIC_API_KEY.");
+    throw new Error("Anthropic mode in Claw Dev requires ANTHROPIC_API_KEY or OAuth login.");
   }
   env.ANTHROPIC_API_KEY = key;
   process.stdout.write("Using the provided ANTHROPIC_API_KEY for this session.\n");
-  process.stdout.write("This avoids the auth conflict between claude.ai login state and direct API usage.\n");
+}
+
+function ensureSeparateConfigDir(env) {
+  if (env.CLAUDE_CONFIG_DIR) return;
+
+  const clawConfigDir = path.join(os.homedir(), ".claw-dev");
+  fs.mkdirSync(clawConfigDir, { recursive: true });
+
+  // Copy OAuth credentials from real Claude Code if they exist and we don't have our own
+  const realCredsPath = path.join(os.homedir(), ".claude", ".credentials.json");
+  const clawCredsPath = path.join(clawConfigDir, ".credentials.json");
+  if (fs.existsSync(realCredsPath) && !fs.existsSync(clawCredsPath)) {
+    try {
+      fs.copyFileSync(realCredsPath, clawCredsPath);
+    } catch {}
+  }
+
+  // Copy settings if they don't exist
+  const realSettingsPath = path.join(os.homedir(), ".claude", "settings.json");
+  const clawSettingsPath = path.join(clawConfigDir, "settings.json");
+  if (fs.existsSync(realSettingsPath) && !fs.existsSync(clawSettingsPath)) {
+    try {
+      fs.copyFileSync(realSettingsPath, clawSettingsPath);
+    } catch {}
+  }
+
+  env.CLAUDE_CONFIG_DIR = clawConfigDir;
+}
+
+function readOAuthCredentials(env) {
+  const configDir = env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), ".claw-dev");
+  const credsPath = path.join(configDir, ".credentials.json");
+  try {
+    const data = JSON.parse(fs.readFileSync(credsPath, "utf8"));
+    const oauth = data.claudeAiOauth;
+    if (oauth && oauth.accessToken && oauth.expiresAt > Date.now()) {
+      return oauth;
+    }
+  } catch {}
+  // Fallback: check real Claude Code credentials
+  try {
+    const realPath = path.join(os.homedir(), ".claude", ".credentials.json");
+    const data = JSON.parse(fs.readFileSync(realPath, "utf8"));
+    const oauth = data.claudeAiOauth;
+    if (oauth && oauth.accessToken && oauth.expiresAt > Date.now()) {
+      return oauth;
+    }
+  } catch {}
+  return null;
 }
 
 async function configureCompatProvider(provider, env, rl, modelArg) {
