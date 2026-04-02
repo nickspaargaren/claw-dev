@@ -1,5 +1,12 @@
 # Claw Dev
 
+**Security Assessment (April 2, 2026):** This repository fork has been security audited by Claude Sonnet 4.5 and [Nick Spaargaren](https://github.com/nickspaargaren) and verified safe to use. The bundled code is the official Anthropic Claude Code v2.1.87 package, with a custom multi-provider launcher wrapper.
+
+- ✅ Bundled tarball verified as official `@anthropic-ai/claude-code` package from Anthropic
+- ✅ No malicious code detected in source files, dependencies, or bundled binaries
+- ✅ Local proxy binds to `127.0.0.1` only (localhost)
+- ⚠️ Standard AI coding tool considerations apply: code/prompts are sent to AI provider APIs for processing
+
 Claw Dev is a local multi-provider coding assistant launcher for the bundled terminal client in this repository. It gives you one entry point and lets you choose how model requests are resolved at startup:
 
 - Anthropic direct mode with `ANTHROPIC_API_KEY`
