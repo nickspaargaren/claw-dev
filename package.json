@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "check": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test tests/**/*.test.mjs",
     "dev": "tsx src/index.ts",
     "claw-dev": "node Leonxlnx-claude-code/claw-dev-launcher.js",
     "proxy:compat": "tsx src/anthropicCompatProxy.ts",
