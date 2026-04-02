@@ -302,23 +302,11 @@ async function configureAnthropic(env, rl) {
   // Check if OAuth credentials exist (from `claude login` or Claude Max subscription)
   const oauthCreds = readOAuthCredentials(env);
   if (oauthCreds) {
-    // Auto-select OAuth in non-interactive mode (--print, piped stdin)
-    const isInteractive = process.stdin.isTTY && !process.argv.includes("--print");
-    let choice = "1";
-
-    if (isInteractive) {
-      process.stdout.write("\nAnthropic auth method\n");
-      process.stdout.write("1. OAuth login (Claude Pro/Max — uses existing claude.ai login)\n");
-      process.stdout.write("2. API key (ANTHROPIC_API_KEY)\n");
-      choice = (await rl.question("Choose auth method [1]: ")).trim() || "1";
-    }
-
-    if (choice === "1") {
-      // OAuth mode: don't set ANTHROPIC_API_KEY, let the bundled client use its own OAuth flow
-      process.stdout.write(`Using OAuth login (${oauthCreds.subscriptionType || "claude.ai"}).\n`);
-      process.stdout.write("Sessions and credentials are isolated from stock Claude Code.\n");
-      return;
-    }
+    // Auto-use OAuth when available — no extra prompt needed
+    process.stdout.write(`Using OAuth login (${oauthCreds.subscriptionType || "claude.ai"}).\n`);
+    process.stdout.write("Sessions and credentials are isolated from stock Claude Code.\n");
+    process.stdout.write("To use an API key instead, set ANTHROPIC_API_KEY in your environment.\n");
+    return;
   }
 
   const key = (await rl.question("Enter ANTHROPIC_API_KEY (input is visible): ")).trim();
