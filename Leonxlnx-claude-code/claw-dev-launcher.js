@@ -329,10 +329,10 @@ function ensureSeparateConfigDir(env) {
   const clawConfigDir = path.join(os.homedir(), ".claw-dev");
   fs.mkdirSync(clawConfigDir, { recursive: true });
 
-  // Copy OAuth credentials from real Claude Code if they exist and we don't have our own
+  // Always sync OAuth credentials from real Claude Code so tokens stay fresh
   const realCredsPath = path.join(os.homedir(), ".claude", ".credentials.json");
   const clawCredsPath = path.join(clawConfigDir, ".credentials.json");
-  if (fs.existsSync(realCredsPath) && !fs.existsSync(clawCredsPath)) {
+  if (fs.existsSync(realCredsPath)) {
     try {
       fs.copyFileSync(realCredsPath, clawCredsPath);
     } catch {}
